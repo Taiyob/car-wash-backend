@@ -52,6 +52,11 @@ const getAllAvailableSlotFromDB = async () => {
   return result;
 };
 
+const getSlotsByIdFromDB = async (slotId: string) => {
+  const result = await Slot.find({ _id: slotId, isBooked: 'available' });
+  return result;
+};
+
 const getSlotsByServiceIdFromDB = async (serviceId: string) => {
   const result = await Slot.find({ service: serviceId, isBooked: 'available' });
   return result;
@@ -61,4 +66,5 @@ export const SlotServices = {
   createSlotDB,
   getAllAvailableSlotFromDB,
   getSlotsByServiceIdFromDB,
+  getSlotsByIdFromDB,
 };

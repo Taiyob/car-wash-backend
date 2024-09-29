@@ -26,6 +26,18 @@ const getAllAvailableSlot = catchAsync(async (req, res) => {
   });
 });
 
+const getSlotsById = catchAsync(async (req, res) => {
+  const { slotId } = req.params;
+  const result = await SlotServices.getSlotsByIdFromDB(slotId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Slots retrieved successfully',
+    data: result,
+  });
+});
+
 const getSlotsByServiceId = catchAsync(async (req, res) => {
   const { serviceId } = req.params;
   const result = await SlotServices.getSlotsByServiceIdFromDB(serviceId);
@@ -41,5 +53,6 @@ const getSlotsByServiceId = catchAsync(async (req, res) => {
 export const SlotControllers = {
   createSlot,
   getAllAvailableSlot,
+  getSlotsById,
   getSlotsByServiceId,
 };

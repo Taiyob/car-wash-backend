@@ -27,8 +27,6 @@ const createBookingIntoDB = async ({
 
   const serviceId = payLoad.service ? payLoad.service.toString() : null;
   const slotId = payLoad.slot ? payLoad.slot.toString() : null;
-  console.log('Service ID', serviceId);
-  console.log('Slot ID', slotId);
 
   if (!serviceId || !slotId) {
     throw new AppError(
@@ -66,14 +64,36 @@ const createBookingIntoDB = async ({
     );
   }
 
-  const result = await Booking.create({
-    ...payLoad,
-    customer: user,
-    service: service,
-    slot: slot,
-  });
+  const session = await Slot.startSession();
 
-  return result;
+  try {
+    session.startTransaction();
+
+    const result = await Booking.create(
+      [{ ...payLoad, customer: user, service: service, slot: slot }],
+      { session },
+    );
+
+    await Slot.updateOne(
+      { _id: slotId },
+      { $set: { isBooked: 'booked' } },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return result[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error during booking creation:', error);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to create booking and update slot status',
+    );
+  } finally {
+    session.endSession();
+  }
 };
 
 const getAllBookingsFromDB = async () => {

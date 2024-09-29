@@ -13,6 +13,8 @@ router.post(
 
 router.get('/availability', SlotControllers.getAllAvailableSlot);
 
+router.get('/slot/:slotId', SlotControllers.getSlotsById);
+
 router.get('/:serviceId', SlotControllers.getSlotsByServiceId);
 
 export const SlotRoutes = router;
