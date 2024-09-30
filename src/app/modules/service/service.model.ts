@@ -24,6 +24,10 @@ const serviceSchema = new Schema<TService, ServiceModel>(
       type: Boolean,
       default: false,
     },
+    image: {
+      type: [String],
+      default: null,
+    },
   },
   { timestamps: true },
 );
