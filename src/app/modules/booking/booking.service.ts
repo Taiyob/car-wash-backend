@@ -97,7 +97,10 @@ const createBookingIntoDB = async ({
 };
 
 const getAllBookingsFromDB = async () => {
-  const result = await Booking.find();
+  const result = await Booking.find({ status: 'pending' })
+    .populate('customer')
+    .populate('service')
+    .populate('slot');
 
   return result;
 };
@@ -111,16 +114,44 @@ const getUserHisAllBookingsFromDB = async (userInfo: JwtPayload) => {
       'User information is missing or invalid.',
     );
   }
+  console.log('User ID:', user._id);
+  const result = await Booking.find({ customer: user._id })
+    .populate('service')
+    .populate('slot');
 
-  const result = await Booking.find({ user: user._id });
-  // .populate('service')
-  // .populate('slot');
+  console.log('From service', result);
 
   return result;
+};
+
+const completeBookingInDB = async (
+  bookingId: string,
+  payload: Partial<TBooking>,
+) => {
+  const booking = await Booking.findById(bookingId);
+
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking not found');
+  }
+
+  const completeBooking = booking.status === 'completed';
+  if (completeBooking) {
+    throw new AppError(httpStatus.CONFLICT, 'Already complete this booking!!!');
+  }
+
+  const updatedService = await Booking.findByIdAndUpdate(
+    bookingId,
+    { ...payload, status: 'completed' },
+    {
+      new: true,
+    },
+  );
+  return updatedService;
 };
 
 export const BookingServices = {
   createBookingIntoDB,
   getAllBookingsFromDB,
   getUserHisAllBookingsFromDB,
+  completeBookingInDB,
 };

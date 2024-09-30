@@ -40,6 +40,7 @@ const bookingSchema = new Schema<TBooking>(
       required: [true, 'Registration plate is required'],
       unique: true,
     },
+    status: { type: String, default: 'pending' },
   },
   { timestamps: true },
 );
